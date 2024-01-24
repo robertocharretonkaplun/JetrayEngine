@@ -31,6 +31,7 @@ public:
 	destroy();
 
 public:
+	// 
 	HWND m_hWnd = nullptr;
 	unsigned int m_width;
 	unsigned int m_height;

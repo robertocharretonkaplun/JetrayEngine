@@ -424,12 +424,14 @@
   <ItemGroup />
   <ItemGroup>
     <ClCompile Include="JetrayEngine.cpp" />
+    <ClCompile Include="src\Device.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="JetrayEngine.fx" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Device.h" />
     <ClInclude Include="include\Prerequisites.h" />
     <ClInclude Include="include\Resource.h" />
     <ClInclude Include="include\Window.h" />
