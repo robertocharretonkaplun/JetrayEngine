@@ -5,7 +5,7 @@ class
 DeviceContext {
 public:
 	DeviceContext() = default;
-	~DeviceContext() {SAFE_RELEASE(m_deviceContext); };
+	~DeviceContext() { SAFE_RELEASE(m_deviceContext); };
 
 	void 
   init();
@@ -18,6 +18,12 @@ public:
   
   void 
   destroy();
+
+  void 
+  ClearDepthStencilView(ID3D11DepthStencilView* pDepthStencilView,
+                        unsigned int ClearFlags,
+                        float Depth,
+                        unsigned int  Stencil);
 
 public:
   ID3D11DeviceContext* m_deviceContext = nullptr;

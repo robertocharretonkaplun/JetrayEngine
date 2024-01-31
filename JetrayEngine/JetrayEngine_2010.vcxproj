@@ -424,13 +424,16 @@
   <ItemGroup />
   <ItemGroup>
     <ClCompile Include="JetrayEngine.cpp" />
+    <ClCompile Include="src\DepthStencilView.cpp" />
     <ClCompile Include="src\Device.cpp" />
+    <ClCompile Include="src\DeviceContext.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="JetrayEngine.fx" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\DepthStencilView.h" />
     <ClInclude Include="include\Device.h" />
     <ClInclude Include="include\DeviceContext.h" />
     <ClInclude Include="include\Prerequisites.h" />
