@@ -1,6 +1,9 @@
 #pragma once
 #include "Prerequisites.h"
 
+/*
+	Brief: This class is in charge of creating reosurces
+*/
 class 
 Device {
 public:
