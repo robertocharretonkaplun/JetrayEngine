@@ -1,6 +1,7 @@
 #pragma once
 #include "Prerequisites.h"
 
+// Forward Declaration - Declaraciones Directas
 class Device;
 class DeviceContext;
 class Window;
@@ -31,7 +32,7 @@ public:
   present();
 public:
   IDXGISwapChain* m_swapChain = nullptr;
-private:
   D3D_DRIVER_TYPE m_driverType = D3D_DRIVER_TYPE_NULL;
+private:
   D3D_FEATURE_LEVEL m_featureLevel = D3D_FEATURE_LEVEL_11_0;
 };

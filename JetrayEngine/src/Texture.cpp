@@ -3,12 +3,12 @@
 #include "DeviceContext.h"
 
 Texture::~Texture() {
-	if (m_texture != nullptr) {
+	/*if (m_texture != nullptr) {
 		SAFE_RELEASE(m_texture);
 	}
 	else  if (m_textureFromImg != nullptr) {
 		SAFE_RELEASE(m_textureFromImg);
-	}
+	}*/
 }
 
 void
@@ -77,6 +77,10 @@ Texture::init(Device device,
 		exit(1);
 	}
 
+}
+
+void 
+Texture::update() {
 }
 
 void 
