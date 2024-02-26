@@ -50,6 +50,12 @@
     <ClInclude Include="include\Viewport.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="include\ShaderProgram.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\InputLayout.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="JetrayEngine.cpp" />
@@ -75,6 +81,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Viewport.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InputLayout.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ShaderProgram.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

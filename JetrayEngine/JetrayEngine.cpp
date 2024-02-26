@@ -15,6 +15,7 @@
 #include "SwapChain.h"
 #include "RenderTargetView.h"
 #include "Viewport.h"
+#include "ShaderProgram.h"
 
 //--------------------------------------------------------------------------------------
 // Structures
@@ -54,10 +55,11 @@ SwapChain														g_swapchain;
 Texture															g_backBuffer;
 RenderTargetView                    g_renderTargetView;
 Viewport														g_viewport;
+ShaderProgram												g_shaderProgram;
 
-ID3D11VertexShader* g_pVertexShader = nullptr;
-ID3D11PixelShader* g_pPixelShader = nullptr;
-ID3D11InputLayout* g_pVertexLayout = nullptr;
+//ID3D11VertexShader* g_pVertexShader = nullptr;
+//ID3D11PixelShader* g_pPixelShader = nullptr;
+//ID3D11InputLayout* g_pVertexLayout = nullptr;
 ID3D11Buffer* g_pVertexBuffer = nullptr;
 ID3D11Buffer* g_pIndexBuffer = nullptr;
 ID3D11Buffer* g_pCBNeverChanges = nullptr;
@@ -180,6 +182,7 @@ HRESULT InitDevice()
 	g_viewport.init(g_window);
 
 	// Compile the vertex shader
+	/*
 	ID3DBlob* pVSBlob = nullptr;
 	hr = CompileShaderFromFile("JetrayEngine.fx", "VS", "vs_4_0", &pVSBlob);
 	if (FAILED(hr))
@@ -196,26 +199,53 @@ HRESULT InitDevice()
 		pVSBlob->Release();
 		return hr;
 	}
+	*/
 
 	// Define the input layout
+	/*
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-	UINT numElements = ARRAYSIZE(layout);
+	*/
+	//UINT numElements = ARRAYSIZE(layout);
 
+	std::vector<D3D11_INPUT_ELEMENT_DESC> Layout;
+	D3D11_INPUT_ELEMENT_DESC position;
+	position.SemanticName = "POSITION";
+	position.SemanticIndex = 0;
+	position.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	position.InputSlot = 0;
+	position.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT /*12*/;
+	position.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	position.InstanceDataStepRate = 0;
+	Layout.push_back(position);
+
+	D3D11_INPUT_ELEMENT_DESC texcoord;
+	texcoord.SemanticName = "TEXCOORD";
+	texcoord.SemanticIndex = 0;
+	texcoord.Format = DXGI_FORMAT_R32G32_FLOAT;
+	texcoord.InputSlot = 0;
+	texcoord.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT /*12*/;
+	texcoord.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	texcoord.InstanceDataStepRate = 0;
+	Layout.push_back(texcoord);
+
+	// Init shader
+	g_shaderProgram.init(g_device, "JetrayEngine.fx", Layout);
 	// Create the input layout
-	hr = g_device.CreateInputLayout(layout, numElements, pVSBlob->GetBufferPointer(),
-		pVSBlob->GetBufferSize(), &g_pVertexLayout);
-	pVSBlob->Release();
-	if (FAILED(hr))
-		return hr;
+	//hr = g_device.CreateInputLayout(layout, numElements, pVSBlob->GetBufferPointer(),
+	//	pVSBlob->GetBufferSize(), &g_pVertexLayout);
+	//pVSBlob->Release();
+	//if (FAILED(hr))
+	//	return hr;
 
 	// Set the input layout
-	g_deviceContext.m_deviceContext->IASetInputLayout(g_pVertexLayout);
+	//g_deviceContext.m_deviceContext->IASetInputLayout(g_pVertexLayout);
 
 	// Compile the pixel shader
+	/*
 	ID3DBlob* pPSBlob = nullptr;
 	hr = CompileShaderFromFile("JetrayEngine.fx", "PS", "ps_4_0", &pPSBlob);
 	if (FAILED(hr))
@@ -230,6 +260,7 @@ HRESULT InitDevice()
 	pPSBlob->Release();
 	if (FAILED(hr))
 		return hr;
+	*/
 
 	// Create vertex buffer
 	SimpleVertex vertices[] =
@@ -402,9 +433,12 @@ void CleanupDevice()
 	// Release Shader resources
 	if (g_pVertexBuffer) g_pVertexBuffer->Release();
 	if (g_pIndexBuffer) g_pIndexBuffer->Release();
-	if (g_pVertexLayout) g_pVertexLayout->Release();
-	if (g_pVertexShader) g_pVertexShader->Release();
-	if (g_pPixelShader) g_pPixelShader->Release();
+	//if (g_pVertexLayout) g_pVertexLayout->Release();
+	//if (g_pVertexShader) g_pVertexShader->Release();
+	//if (g_pPixelShader) g_pPixelShader->Release();
+	// 
+	// Release Shader program
+	g_shaderProgram.destroy();
 	// Release depth stencil
 	g_depthStencil.destroy();
 	// Release depth stencil view 
@@ -486,14 +520,14 @@ void Render()
 	cb.vMeshColor = g_vMeshColor;
 	g_deviceContext.m_deviceContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, nullptr, &cb, 0, 0);
 
-	//
+	
 	// Render the cube
-	//
-	g_deviceContext.m_deviceContext->VSSetShader(g_pVertexShader, nullptr, 0);
+	g_shaderProgram.render(g_deviceContext);
+	//g_deviceContext.m_deviceContext->VSSetShader(g_pVertexShader, nullptr, 0);
 	g_deviceContext.m_deviceContext->VSSetConstantBuffers(0, 1, &g_pCBNeverChanges);
 	g_deviceContext.m_deviceContext->VSSetConstantBuffers(1, 1, &g_pCBChangeOnResize);
 	g_deviceContext.m_deviceContext->VSSetConstantBuffers(2, 1, &g_pCBChangesEveryFrame);
-	g_deviceContext.m_deviceContext->PSSetShader(g_pPixelShader, nullptr, 0);
+	//g_deviceContext.m_deviceContext->PSSetShader(g_pPixelShader, nullptr, 0);
 	g_deviceContext.m_deviceContext->PSSetConstantBuffers(2, 1, &g_pCBChangesEveryFrame);
 	g_deviceContext.m_deviceContext->PSSetShaderResources(0, 1, &g_pTextureRV);
 	g_deviceContext.m_deviceContext->PSSetSamplers(0, 1, &g_pSamplerLinear);
