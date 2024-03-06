@@ -424,11 +424,13 @@
   <ItemGroup />
   <ItemGroup>
     <ClCompile Include="JetrayEngine.cpp" />
+    <ClCompile Include="src\Buffer.cpp" />
     <ClCompile Include="src\DepthStencilView.cpp" />
     <ClCompile Include="src\Device.cpp" />
     <ClCompile Include="src\DeviceContext.cpp" />
     <ClCompile Include="src\InputLayout.cpp" />
     <ClCompile Include="src\RenderTargetView.cpp" />
+    <ClCompile Include="src\SamplerState.cpp" />
     <ClCompile Include="src\ShaderProgram.cpp" />
     <ClCompile Include="src\SwapChain.cpp" />
     <ClCompile Include="src\Texture.cpp" />
@@ -439,6 +441,7 @@
     <None Include="JetrayEngine.fx" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Buffer.h" />
     <ClInclude Include="include\DepthStencilView.h" />
     <ClInclude Include="include\Device.h" />
     <ClInclude Include="include\DeviceContext.h" />
@@ -446,6 +449,7 @@
     <ClInclude Include="include\Prerequisites.h" />
     <ClInclude Include="include\RenderTargetView.h" />
     <ClInclude Include="include\Resource.h" />
+    <ClInclude Include="include\SamplerState.h" />
     <ClInclude Include="include\ShaderProgram.h" />
     <ClInclude Include="include\SwapChain.h" />
     <ClInclude Include="include\Texture.h" />

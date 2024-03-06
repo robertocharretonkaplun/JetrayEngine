@@ -56,6 +56,12 @@
     <ClInclude Include="include\InputLayout.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="include\Buffer.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SamplerState.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="JetrayEngine.cpp" />
@@ -87,6 +93,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ShaderProgram.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Buffer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SamplerState.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

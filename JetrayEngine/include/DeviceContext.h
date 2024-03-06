@@ -55,6 +55,30 @@ public:
               ID3D11ClassInstance *const *ppClassInstances,
               unsigned int NumClassInstances);
 
+  void 
+  UpdateSubresource(ID3D11Resource* pDstResource, 
+                    unsigned int DstSubresource,
+                    const D3D11_BOX* pDstBox,
+                    const void* pSrcData,
+                    unsigned int SrcRowPitch,
+                    unsigned int SrcDepthPitch);
+
+  void 
+  IASetVertexBuffers(unsigned int StartSlot,
+                     unsigned int NumBuffers,
+                     ID3D11Buffer *const *ppVertexBuffers,
+                     const unsigned int*pStrides,
+                     const unsigned int*pOffsets);
+
+  void 
+  IASetIndexBuffer(ID3D11Buffer *pIndexBuffer,
+                   DXGI_FORMAT Format,
+                   unsigned int Offset);
+
+  void
+  PSSetSamplers(unsigned int StartSlot,
+                unsigned int NumSamplers,
+                ID3D11SamplerState* const* ppSamplers);
 public:
   ID3D11DeviceContext* m_deviceContext = nullptr;
 };

@@ -16,15 +16,13 @@
 #include "RenderTargetView.h"
 #include "Viewport.h"
 #include "ShaderProgram.h"
+#include "Buffer.h"
+#include "SamplerState.h"
 
 //--------------------------------------------------------------------------------------
 // Structures
 //--------------------------------------------------------------------------------------
-struct SimpleVertex
-{
-	XMFLOAT3 Pos;
-	XMFLOAT2 Tex;
-};
+
 
 struct CBNeverChanges
 {
@@ -56,22 +54,18 @@ Texture															g_backBuffer;
 RenderTargetView                    g_renderTargetView;
 Viewport														g_viewport;
 ShaderProgram												g_shaderProgram;
-
-//ID3D11VertexShader* g_pVertexShader = nullptr;
-//ID3D11PixelShader* g_pPixelShader = nullptr;
-//ID3D11InputLayout* g_pVertexLayout = nullptr;
-ID3D11Buffer* g_pVertexBuffer = nullptr;
-ID3D11Buffer* g_pIndexBuffer = nullptr;
-ID3D11Buffer* g_pCBNeverChanges = nullptr;
-ID3D11Buffer* g_pCBChangeOnResize = nullptr;
-ID3D11Buffer* g_pCBChangesEveryFrame = nullptr;
-ID3D11ShaderResourceView* g_pTextureRV = nullptr;
-ID3D11SamplerState* g_pSamplerLinear = nullptr;
+Buffer															g_vertexBuffer;
+Buffer															g_indexBuffer;
+ID3D11Buffer*												g_pCBNeverChanges = nullptr;
+ID3D11Buffer*												g_pCBChangeOnResize = nullptr;
+ID3D11Buffer*												g_pCBChangesEveryFrame = nullptr;
+ID3D11ShaderResourceView*						g_pTextureRV = nullptr;
+SamplerState                        g_sampler;
 XMMATRIX                            g_World;
 XMMATRIX                            g_View;
 XMMATRIX                            g_Projection;
 XMFLOAT4                            g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
-
+Mesh																g_mesh;
 
 //--------------------------------------------------------------------------------------
 // Forward declarations
@@ -176,40 +170,10 @@ HRESULT InitDevice()
 													g_depthStencil.m_texture, 
 													DXGI_FORMAT_D24_UNORM_S8_UINT);
 
-	//g_deviceContext.m_deviceContext->OMSetRenderTargets(1, &g_pRenderTargetView, g_depthStencilView.m_depthStencilView);
-
 	// Setup the viewport
 	g_viewport.init(g_window);
 
-	// Compile the vertex shader
-	/*
-	ID3DBlob* pVSBlob = nullptr;
-	hr = CompileShaderFromFile("JetrayEngine.fx", "VS", "vs_4_0", &pVSBlob);
-	if (FAILED(hr))
-	{
-		MessageBox(nullptr,
-			"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", "Error", MB_OK);
-		return hr;
-	}
-
-	// Create the vertex shader
-	hr = g_device.CreateVertexShader(pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), nullptr, &g_pVertexShader);
-	if (FAILED(hr))
-	{
-		pVSBlob->Release();
-		return hr;
-	}
-	*/
-
 	// Define the input layout
-	/*
-	D3D11_INPUT_ELEMENT_DESC layout[] =
-	{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-	*/
-	//UINT numElements = ARRAYSIZE(layout);
 
 	std::vector<D3D11_INPUT_ELEMENT_DESC> Layout;
 	D3D11_INPUT_ELEMENT_DESC position;
@@ -234,34 +198,9 @@ HRESULT InitDevice()
 
 	// Init shader
 	g_shaderProgram.init(g_device, "JetrayEngine.fx", Layout);
-	// Create the input layout
-	//hr = g_device.CreateInputLayout(layout, numElements, pVSBlob->GetBufferPointer(),
-	//	pVSBlob->GetBufferSize(), &g_pVertexLayout);
-	//pVSBlob->Release();
-	//if (FAILED(hr))
-	//	return hr;
 
-	// Set the input layout
-	//g_deviceContext.m_deviceContext->IASetInputLayout(g_pVertexLayout);
-
-	// Compile the pixel shader
-	/*
-	ID3DBlob* pPSBlob = nullptr;
-	hr = CompileShaderFromFile("JetrayEngine.fx", "PS", "ps_4_0", &pPSBlob);
-	if (FAILED(hr))
-	{
-		MessageBox(nullptr,
-			"The FX file cannot be compiled.  Please run this executable from the directory that contains the FX file.", "Error", MB_OK);
-		return hr;
-	}
-
-	// Create the pixel shader
-	hr = g_device.CreatePixelShader(pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize(), nullptr, &g_pPixelShader);
-	pPSBlob->Release();
-	if (FAILED(hr))
-		return hr;
-	*/
-
+	// Generar Mesh
+	// -> Carga de modelo 3D
 	// Create vertex buffer
 	SimpleVertex vertices[] =
 	{
@@ -296,27 +235,17 @@ HRESULT InitDevice()
 			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
 	};
 
-	D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(SimpleVertex) * 24;
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.CPUAccessFlags = 0;
-	D3D11_SUBRESOURCE_DATA InitData;
-	ZeroMemory(&InitData, sizeof(InitData));
-	InitData.pSysMem = vertices;
-	hr = g_device.CreateBuffer(&bd, &InitData, &g_pVertexBuffer);
-	if (FAILED(hr))
-		return hr;
+	
 
-	// Set vertex buffer
-	UINT stride = sizeof(SimpleVertex);
-	UINT offset = 0;
-	g_deviceContext.m_deviceContext->IASetVertexBuffers(0, 1, &g_pVertexBuffer, &stride, &offset);
+	for (SimpleVertex vertex : vertices) {
+		g_mesh.vertex.push_back(vertex);
+	}
+	g_mesh.numVertex = g_mesh.vertex.size();
 
-	// Create index buffer
 	// Create vertex buffer
-	WORD indices[] =
+	g_vertexBuffer.init(g_device, g_mesh, D3D11_BIND_VERTEX_BUFFER);
+
+	unsigned int indices[] =
 	{
 			3,1,0,
 			2,1,3,
@@ -337,22 +266,19 @@ HRESULT InitDevice()
 			23,20,22
 	};
 
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(WORD) * 36;
-	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	bd.CPUAccessFlags = 0;
-	InitData.pSysMem = indices;
-	hr = g_device.CreateBuffer(&bd, &InitData, &g_pIndexBuffer);
-	if (FAILED(hr))
-		return hr;
+	for (unsigned int index : indices) {
+		g_mesh.index.push_back(index);
+	}
+	g_mesh.numIndex = g_mesh.index.size();
 
-	// Set index buffer
-	g_deviceContext.m_deviceContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+	// Create index buffer
+	g_indexBuffer.init(g_device, g_mesh, D3D11_BIND_INDEX_BUFFER);
 
-	// Set primitive topology
-	g_deviceContext.m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	
 
 	// Create the constant buffers
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
 	bd.Usage = D3D11_USAGE_DEFAULT;
 	bd.ByteWidth = sizeof(CBNeverChanges);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -377,18 +303,7 @@ HRESULT InitDevice()
 		return hr;
 
 	// Create the sample state
-	D3D11_SAMPLER_DESC sampDesc;
-	ZeroMemory(&sampDesc, sizeof(sampDesc));
-	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	sampDesc.MinLOD = 0;
-	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	hr = g_device.CreateSamplerState(&sampDesc, &g_pSamplerLinear);
-	if (FAILED(hr))
-		return hr;
+	g_sampler.init(g_device);
 
 	// Initialize the world matrices
 	g_World = XMMatrixIdentity();
@@ -422,7 +337,7 @@ void CleanupDevice()
 	// Release Device Context
 	g_deviceContext.destroy();
 	// Release Sampler Linear
-	if (g_pSamplerLinear) g_pSamplerLinear->Release();
+	g_sampler.destroy();
 	// Release Model Textures
 	if (g_pTextureRV) g_pTextureRV->Release();
 	// Release Camera resources
@@ -431,12 +346,10 @@ void CleanupDevice()
 	// Release Model resources
 	if (g_pCBChangesEveryFrame) g_pCBChangesEveryFrame->Release();
 	// Release Shader resources
-	if (g_pVertexBuffer) g_pVertexBuffer->Release();
-	if (g_pIndexBuffer) g_pIndexBuffer->Release();
-	//if (g_pVertexLayout) g_pVertexLayout->Release();
-	//if (g_pVertexShader) g_pVertexShader->Release();
-	//if (g_pPixelShader) g_pPixelShader->Release();
-	// 
+	//if (g_pVertexBuffer) g_pVertexBuffer->Release();
+	//if (g_pIndexBuffer) g_pIndexBuffer->Release();
+	g_vertexBuffer.destroy();
+	g_indexBuffer.destroy();
 	// Release Shader program
 	g_shaderProgram.destroy();
 	// Release depth stencil
@@ -448,6 +361,7 @@ void CleanupDevice()
 	// Release swapchain
 	g_swapchain.destroy();
 	// Release UI
+	// 
 	// Release device
 	g_device.destroy();
 }
@@ -529,9 +443,17 @@ void Render()
 	g_deviceContext.m_deviceContext->VSSetConstantBuffers(2, 1, &g_pCBChangesEveryFrame);
 	//g_deviceContext.m_deviceContext->PSSetShader(g_pPixelShader, nullptr, 0);
 	g_deviceContext.m_deviceContext->PSSetConstantBuffers(2, 1, &g_pCBChangesEveryFrame);
+
+
+	g_sampler.render(g_deviceContext, 0, 1);
+	g_vertexBuffer.render(g_deviceContext, 0, 1);
+	g_indexBuffer.render(g_deviceContext, DXGI_FORMAT_R32_UINT);
+	
+
 	g_deviceContext.m_deviceContext->PSSetShaderResources(0, 1, &g_pTextureRV);
-	g_deviceContext.m_deviceContext->PSSetSamplers(0, 1, &g_pSamplerLinear);
-	g_deviceContext.m_deviceContext->DrawIndexed(36, 0, 0);
+	
+	g_deviceContext.m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	g_deviceContext.m_deviceContext->DrawIndexed(g_mesh.numIndex, 0, 0);
 
 	//
 	// Present our back buffer to our front buffer
